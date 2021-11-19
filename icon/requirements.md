@@ -142,6 +142,35 @@ In Mac OS or Linux, copy `goloop/bin/goloop` to `/usr/local/bin`
 
 In Windows, add `goloop/bin` PATH to Environment Variables
 
+Execute goloop command to check installation successed:
+
+```
+$ goloop
+Goloop CLI
+
+Usage:
+  goloop [command]
+
+Available Commands:
+  chain       Manage chains
+  debug       DEBUG API
+  gn          Genesis transaction manipulation
+  gs          Genesis storage manipulation
+  help        Help about any command
+  ks          Keystore manipulation
+  rpc         JSON-RPC API
+  server      Server management
+  stats       Display a live streams of chains metric-statistics
+  system      System info
+  user        User management
+  version     Print goloop version
+
+Flags:
+  -h, --help   help for goloop
+
+Use "goloop [command] --help" for more information about a command.
+```
+
 ## start gochain local docker
 
 1. Clone gochain local repository:
