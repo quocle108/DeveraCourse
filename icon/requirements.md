@@ -113,7 +113,7 @@ Guide how to install [here](https://github.com/facebook/rocksdb/wiki/Building-on
 1. Clone goloop repository:
 
 ```bash
-$ git clone git@github.com:icon-project/gochain-local.git
+$ git clone https://github.com/icon-project/goloop.git
 ```
 
 2. Build go chain docker images: 
