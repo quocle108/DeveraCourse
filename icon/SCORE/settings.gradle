@@ -1,4 +1,5 @@
 rootProject.name = 'Devera-sample-score'
 include (
-    'irc2'
+    'irc2',
+    'sampleContract'
     )
