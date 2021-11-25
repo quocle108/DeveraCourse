@@ -22,7 +22,7 @@ Initialize parameters:
 - _initialSupply: amount of initial supply of token, belong to account that deployed contract (contract owner)
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx deploy ./irc2/build/libs/IRC2Burnable-0.1.0-optimized.jar \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx deploy ./irc2/build/libs/IRC2BurnableToken-0.1.0-optimized.jar \
     --key_store ./godWallet.json --key_password gochain \
     --nid 0x3 --step_limit 2000000000 --content_type application/java \
     --param _name="QUY VO TOKEN" \
@@ -104,7 +104,7 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx5a924818d89bd
     --key_store ./godWallet.json --key_password gochain \
     --nid 0x3 --step_limit 2000000000 \
     --param _to=hxbb78dbaf1c3ed187e956abcfdf43eb1110077dd4 \
-    --param _value=1000000000000000000
+    --param _value=10000000000000000000
 0xf491225b62717688eecb23eebf09042f1529a9a4d922fec00a99dea9b9e8c835
 
 $ goloop rpc --uri http://127.0.0.1:9082/api/v3 txresult 0xf491225b62717688eecb23eebf09042f1529a9a4d922fec00a99dea9b9e8c835
@@ -160,8 +160,103 @@ Available testnet: https://www.icondev.io/introduction/the-icon-network/testnet
 4. Deploy and transfer token to address: `hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39`
 5. Comment network name, token address, block number deploy token, token name, symbol transaction id that transfer token of step 5
 
+## Crowdsale token SCORE
+
+### deploy to local network
 
 
+Initialize parameters:
+
+- _fundingGoalInIcx: funding goal in ICX
+- _tokenScore: IRC2 token score address
+- _durationInBlocks: crowdsale duration
+- _tokenPrice: IRC2/ICX ratio
 
 
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx deploy ./crowdsale/build/libs/Crowdsale-0.1.0-optimized.jar \
+    --key_store ./godWallet.json --key_password gochain \
+    --nid 0x3 --step_limit 2000000000 --content_type application/java \
+    --param _fundingGoalInIcx=10000000000000000000 \
+    --param _tokenScore=cxde992ec5adbba852ba527ccf04b1041bfbb0e13e \
+    --param _durationInBlocks=3600 \
+    --param _tokenPrice=10
+0xd33c29366d1aaf13e01e1252523f6b30508fbbbfcd361358784461c6650c4bc3
+
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 txresult 0xd33c29366d1aaf13e01e1252523f6b30508fbbbfcd361358784461c6650c4bc3
+{
+  "to": "cx0000000000000000000000000000000000000000",
+  "cumulativeStepUsed": "0x40481544",
+  "stepUsed": "0x40481544",
+  "stepPrice": "0x2e90edd00",
+  "eventLogs": [],
+  "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "status": "0x1",
+  "scoreAddress": "cx8d889b2a3b48985dddafee6799b5cd7e7936dc53",
+  "blockHash": "0x71eeb3b628d5663d596ace26e9d4c87cbea19c661c70e44a9a2bb95b175cd1c5",
+  "blockHeight": "0x1e095",
+  "txIndex": "0x0",
+  "txHash": "0xd33c29366d1aaf13e01e1252523f6b30508fbbbfcd361358784461c6650c4bc3"
+}
+```
+
+Use gradle javaee plugin to deploy:
+
+```
+$ ./gradlew crowdsale:deployToLocal -PkeystoreName=./godWallet.json -PkeystorePass=gochain
+Starting a Gradle Daemon, 1 incompatible Daemon could not be reused, use --status for details
+
+> Task :crowdsale:deployToLocal
+>>> deploy to http://localhost:9082/api/v3
+>>> optimizedJar = /Users/leclevietnam/mwork/DeveraCourse/icon/SCORE/crowdsale/build/libs/Crowdsale-0.1.0-optimized.jar
+>>> keystore = ./godWallet.json
+Succeeded to deploy: 0x960bbf574554f08a332ef6563273af4c30e0fbae6dea11ee822b3aeb1936eda2
+SCORE address: cx6749c6a328d0b33e66dd4ffcce8982c3850be21a
+
+BUILD SUCCESSFUL in 15s
+1 actionable task: 1 executed
+```
+
+Get name and description of crowsale project:
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx6749c6a328d0b33e66dd4ffcce8982c3850be21a \
+    --method name
+"Sample Crowdsale"
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx6749c6a328d0b33e66dd4ffcce8982c3850be21a \
+    --method description
+"Devera ICON dapp development course"
+```
+
+### Transfer IRC2 token to crowdsale score to active crowdsale
+
+```
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxde992ec5adbba852ba527ccf04b1041bfbb0e13e --method transfer \
+  --param _to=cx60567bd07efd69d593a234a6f21e333988908558 \
+  --param _value=1000000000000000000000000 \
+  --key_store ./godWallet.json --key_password gochain \
+  --nid 0x3 --step_limit 2000000000
+```
+
+### User deposit token to crowdsale
+
+Transfer token to crowdsale contract
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cx60567bd07efd69d593a234a6f21e333988908558 --value 100000000000000000 --key_store ./daniel111.ks.json --key_password abc12345 --nid 0x3 --step_limit 1000000000
+```
+
+### Check result
+
+Check IRC2 token after transfer token
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxde992ec5adbba852ba527ccf04b1041bfbb0e13e --method balanceOf --param _owner=hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39
+```
+
+Check ICX balance record in crowdsale contract
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx60567bd07efd69d593a234a6f21e333988908558 --method balanceOf --param _owner=hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39
+```
 

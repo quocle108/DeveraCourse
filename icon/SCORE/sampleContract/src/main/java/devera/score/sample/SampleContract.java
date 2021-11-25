@@ -9,6 +9,7 @@ import score.BranchDB;
 import score.annotation.EventLog;
 import score.annotation.External;
 import score.annotation.Optional;
+import java.util.Map;
 
 import java.math.BigInteger;
 
@@ -16,7 +17,7 @@ public class SampleContract implements ISampleContract {
     private final String name = "sample contract";
     protected static final Address address = new Address(new byte[Address.LENGTH]);
     private final DictDB<Address, BigInteger> balances = Context.newDictDB("balances", BigInteger.class);
-    private final VarDB<BigInteger> vardbExample = Context.newVarDB("varDbExample", BigInteger.class);
+    private final VarDB<Long> vardbExample = Context.newVarDB("varDbExample", Long.class);
     private final ArrayDB<Long> arrayDbExample = Context.newArrayDB("arrayDbExample", Long.class);
     private final BranchDB<String, DictDB<Address, BigInteger>> branchDBExample = Context.newBranchDB("branchDBExample", BigInteger.class);
 
@@ -40,6 +41,14 @@ public class SampleContract implements ISampleContract {
         Event1(_param1, _param2, BigInteger.valueOf(10000), _param3);
     }
 
+    @External
+    public void externalMethod2(Address _param1, Address _param2, long _param3) { // βinput*Sinput = 200*(32 + 32 + 8) = 14400
+        vardbExample.set(_param3);                                                // βset*Sset = 320(8) = 2560
+        Event2(_param1, _param2, _param3);                                        // βeventLog*SeventLog = 100*(32 + 32 + 8) = 7200
+                                                                                  // C = 100,000
+                                                                                  // 14400 + 2560 + 7200 + 100,000 = 124160
+    }
+
     protected void _internalMethod1(Address _param1, BigInteger _param2) {
         // implement internal method
     }
@@ -50,4 +59,7 @@ public class SampleContract implements ISampleContract {
 
     @EventLog(indexed=3)
     public void Event1(Address _param1, Address _param2, BigInteger _param3, byte[] _param4) {}
+
+    @EventLog(indexed=1)
+    public void Event2(Address _param1, Address _param2, long _param3) {}
 }

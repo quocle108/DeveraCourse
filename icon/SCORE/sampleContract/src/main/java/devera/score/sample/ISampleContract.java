@@ -18,5 +18,7 @@ public interface ISampleContract {
 
     void externalMethod1(Address _param1, Address _param2, @Optional byte[] _param3);
 
+    void externalMethod2(Address _param1, Address _param2, long _param3);
+
     void Event1(Address _param1, Address _param2, BigInteger _param3, byte[] _param4);
 }
