@@ -10,7 +10,7 @@ This repository contains SCORE (Smart Contract for ICON) examples written in Jav
 ./gradlew optimizedJar
 ```
 
-If buiding success, `IRC2Burnable-0.1.0-optimized.jar` generated in `icon/SCORE/irc2/build/libs/`, this file is used to deploy contract to ICON network.
+If buiding success, `IRC2BurnableToken-0.1.0-optimized.jar` generated in `icon/SCORE/irc2/build/libs/`, this file is used to deploy contract to ICON network.
 
 ### deploy to local network
 
