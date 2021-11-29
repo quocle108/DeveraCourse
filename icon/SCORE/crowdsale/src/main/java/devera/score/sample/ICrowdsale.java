@@ -22,7 +22,5 @@ public interface ICrowdsale {
 
     void CrowdsaleStarted(BigInteger fundingGoal, long deadline);
 
-    void FundTransfer(Address backer, BigInteger amount);
-
-    void GoalReached(Address recipient, BigInteger totalAmountRaised);
+    void FundDeposit(Address backer, BigInteger amount);
 }

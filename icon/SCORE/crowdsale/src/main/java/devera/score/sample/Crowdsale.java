@@ -21,6 +21,7 @@ public class Crowdsale implements ICrowdsale
     private boolean activeCrowdsale;
     private final DictDB<Address, BigInteger> balances;
     private final VarDB<BigInteger> amountRaised;
+    private BigInteger testAmount;
 
     public Crowdsale(BigInteger _fundingGoalInIcx, Address _tokenScore, BigInteger _durationInBlocks, BigInteger _tokenPrice) {
         // some basic requirements
@@ -37,6 +38,7 @@ public class Crowdsale implements ICrowdsale
         this.balances = Context.newDictDB("balances", BigInteger.class);
         this.amountRaised = Context.newVarDB("amountRaised", BigInteger.class);
         this.tokenPrice = _tokenPrice;
+        this.testAmount = _fundingGoalInIcx;
     }
 
     @External(readonly=true)
@@ -98,7 +100,7 @@ public class Crowdsale implements ICrowdsale
         byte[] _data = "called from Crowdsale".getBytes();
         Context.call(this.tokenScore, "transfer", _from, _value.multiply(this.tokenPrice), _data);
         // emit eventlog
-        FundTransfer(_from, _value);
+        FundDeposit(_from, _value);
     }
 
     private BigInteger safeGetBalance(Address owner) {
@@ -118,8 +120,5 @@ public class Crowdsale implements ICrowdsale
     public void CrowdsaleStarted(BigInteger fundingGoal, long deadline) {}
 
     @EventLog(indexed=2)
-    public void FundTransfer(Address backer, BigInteger amount) {}
-
-    @EventLog(indexed=2)
-    public void GoalReached(Address recipient, BigInteger totalAmountRaised) {}
+    public void FundDeposit(Address backer, BigInteger amount) {}
 }
