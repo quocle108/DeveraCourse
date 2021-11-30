@@ -27,6 +27,7 @@ import foundation.icon.test.TestBase;
 import foundation.icon.test.TransactionHandler;
 import foundation.icon.test.score.CrowdSaleScore;
 import foundation.icon.test.score.SampleTokenScore;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -109,6 +110,24 @@ class CrowdsaleTest extends TestBase {
         }
         tokenScore.ensureTokenBalance(aliceWallet.getAddress(), aliceDepositIcxAmount.multiply(tokenPrice));
         tokenScore.ensureTokenBalance(bobWallet.getAddress(), bobDepositIcxAmount.multiply(tokenPrice));
+        LOG.infoExiting();
+
+        // do safe withdrawal
+        LOG.infoEntering("call", "withdraw()");
+        BigInteger oldBal = txHandler.getBalance(ownerWallet.getAddress());
+        BigInteger withdrawAmount = ICX.multiply(BigInteger.valueOf(30));
+        result = crowdsaleScore.withdraw(ownerWallet, withdrawAmount);
+        if (!Constants.STATUS_SUCCESS.equals(result.getStatus())) {
+            throw new IOException("Failed to execute withdraw.");
+        }
+        crowdsaleScore.ensureFundWithdraw(result, ownerWallet.getAddress(), withdrawAmount);
+
+        // check the final icx balance of owner
+        LOG.info("ICX balance before safeWithdrawal: " + oldBal);
+        BigInteger fee = result.getStepUsed().multiply(result.getStepPrice());
+        BigInteger newBal = oldBal.add(withdrawAmount).subtract(fee);
+        ensureIcxBalance(txHandler, ownerWallet.getAddress(), oldBal, newBal);
+        assertEquals(ICX.multiply(BigInteger.valueOf(70)), crowdsaleScore.amountRaised());
         LOG.infoExiting();
     }
 }

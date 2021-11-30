@@ -50,8 +50,8 @@ deployJar {
 
 test {
     useJUnitPlatform()
-    // testLogging.showStandardStreams = true
-    // testLogging.exceptionFormat = "full"
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = "full"
 }
 
 def irc2TokenBuildDirectory = project(':irc2').buildDir

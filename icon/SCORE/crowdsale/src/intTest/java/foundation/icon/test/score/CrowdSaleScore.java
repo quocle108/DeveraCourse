@@ -54,6 +54,19 @@ public class CrowdSaleScore extends Score {
         super(other);
     }
 
+    public TransactionResult withdraw(Wallet wallet, BigInteger value)
+            throws ResultTimeoutException, IOException {
+        RpcObject params = new RpcObject.Builder()
+            .put("_value", new RpcValue(value))
+            .build();
+        return invokeAndWaitResult(wallet, "withdraw", params);
+    }
+
+    public BigInteger amountRaised()
+            throws ResultTimeoutException, IOException {
+        return this.call("amountRaised", null).asInteger();
+    }
+
     public void ensureFundingGoal(TransactionResult result, BigInteger fundingGoalInIcx)
             throws IOException {
         TransactionResult.EventLog event = findEventLog(result, getAddress(), "CrowdsaleStarted(int,int)");
@@ -69,12 +82,24 @@ public class CrowdSaleScore extends Score {
 
     public void ensureFundDeposit(TransactionResult result, Address backer, BigInteger amount)
             throws IOException {
-        TransactionResult.EventLog event = findEventLog(result, getAddress(), "FundDeposit(Address,int,bool)");
+        TransactionResult.EventLog event = findEventLog(result, getAddress(), "FundDeposit(Address,int)");
         if (event != null) {
             Address _backer = event.getIndexed().get(1).asAddress();
             BigInteger _amount = event.getIndexed().get(2).asInteger();
-            Boolean isContribution = event.getIndexed().get(3).asBoolean();
-            if (backer.equals(_backer) && amount.equals(_amount) && !isContribution) {
+            if (backer.equals(_backer) && amount.equals(_amount)) {
+                return; // ensured
+            }
+        }
+        throw new IOException("ensureFundDeposit failed.");
+    }
+
+    public void ensureFundWithdraw(TransactionResult result, Address backer, BigInteger amount)
+            throws IOException {
+        TransactionResult.EventLog event = findEventLog(result, getAddress(), "FundWithdraw(Address,int)");
+        if (event != null) {
+            Address _backer = event.getIndexed().get(1).asAddress();
+            BigInteger _amount = event.getIndexed().get(2).asInteger();
+            if (backer.equals(_backer) && amount.equals(_amount)) {
                 return; // ensured
             }
         }

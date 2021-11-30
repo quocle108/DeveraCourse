@@ -92,4 +92,24 @@ class CrowdsaleTest extends TestBase {
         assertEquals(fund, Account.getAccount(crowdsaleScore.getAddress()).getBalance());
         assertTrue(fund.multiply(tokenPrice).equals(tokenScore.call("balanceOf", alice.getAddress())));
     }
+
+    @Test
+    void safeWithdrawal() {
+        startCrowdsale();
+        // fund 40 icx from Alice
+        Account alice = sm.createAccount(100);
+        sm.transfer(alice, crowdsaleScore.getAddress(), ICX.multiply(BigInteger.valueOf(40)));
+        // fund 60 icx from Bob
+        Account bob = sm.createAccount(100);
+        sm.transfer(bob, crowdsaleScore.getAddress(), ICX.multiply(BigInteger.valueOf(60)));
+        // make the goal reached
+        sm.getBlock().increase(durationInBlocks.longValue());
+        // invoke safeWithdrawal
+        BigInteger withdrawAmount = ICX.multiply(BigInteger.valueOf(30));
+        crowdsaleScore.invoke(owner, "withdraw", withdrawAmount);
+        // verify
+        verify(crowdsaleSpy).FundWithdraw(owner.getAddress(), withdrawAmount);
+        assertEquals(withdrawAmount, Account.getAccount(owner.getAddress()).getBalance());
+        assertEquals(ICX.multiply(fundingGoalInICX).subtract(withdrawAmount), crowdsaleScore.call("amountRaised"));
+    }
 }

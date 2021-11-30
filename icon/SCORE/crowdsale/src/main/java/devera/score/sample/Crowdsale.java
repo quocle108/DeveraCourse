@@ -56,6 +56,11 @@ public class Crowdsale implements ICrowdsale
         return this.safeGetBalance(_owner);
     }
 
+    @External(readonly=true)
+    public BigInteger amountRaised() {
+        return this.amountRaised.get();
+    }
+
     /*
      * Receives initial tokens to reward to the contributors.
      */
@@ -103,6 +108,38 @@ public class Crowdsale implements ICrowdsale
         FundDeposit(_from, _value);
     }
 
+    /*
+     * Withdraws the funds safely.
+     *
+     *  - If the funding goal has been reached, sends the entire amount to the beneficiary.
+     *  - If the goal was not reached, each contributor can withdraw the amount they contributed.
+     */
+    @External
+    public void withdraw(BigInteger _value) {
+        Context.require(this.activeCrowdsale);
+        Address _from = Context.getCaller();
+        if (!this.beneficiary.equals(_from)) {
+            Context.revert("unauthorized");
+        }
+
+        if (!afterDeadline() && !goalReached()) {
+            Context.revert("can not withdraw during crowdsale");
+        }
+
+        BigInteger amountRaised = safeGetAmountRaised();
+
+        if (amountRaised.compareTo(_value) < 0) {
+            Context.revert("overdraw balance");
+        }
+
+        // transfer the funds to beneficiary
+        Context.transfer(this.beneficiary, _value);
+        // emit eventlog
+        FundWithdraw(this.beneficiary, _value);
+        // reset amountRaised
+        this.amountRaised.set(amountRaised.subtract(_value));
+    }
+
     private BigInteger safeGetBalance(Address owner) {
         return this.balances.getOrDefault(owner, BigInteger.ZERO);
     }
@@ -116,9 +153,20 @@ public class Crowdsale implements ICrowdsale
         return Context.getBlockHeight() >= this.deadline;
     }
 
+    private boolean goalReached() {
+        if (this.amountRaised.get().compareTo(this.fundingGoal) >= 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     @EventLog
     public void CrowdsaleStarted(BigInteger fundingGoal, long deadline) {}
 
     @EventLog(indexed=2)
     public void FundDeposit(Address backer, BigInteger amount) {}
+
+    @EventLog(indexed=2)
+    protected void FundWithdraw(Address owner, BigInteger amount) {}
 }
