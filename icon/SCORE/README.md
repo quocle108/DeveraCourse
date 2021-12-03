@@ -68,13 +68,27 @@ $ ./gradlew irc2:deployToLocal -PkeystoreName=./godWallet.json -PkeystorePass=go
 
 > Task :irc2:deployToLocal
 >>> deploy to http://localhost:9082/api/v3
->>> optimizedJar = /Users/leclevietnam/mwork/DeveraCourse/icon/SCORE/irc2/build/libs/IRC2BurnableToken-0.1.0-optimized.jar
+>>> optimizedJar = /Users/mac/Books/BlockChainLecle/Buoi4-Deploy smartcontract/DeveraCourse/icon/SCORE/irc2/build/libs/IRC2BurnableToken-0.1.0-optimized.jar
 >>> keystore = ./godWallet.json
-Succeeded to deploy: 0x08ad84fe012811ce9cc574d35edee6ab05ff9cf7187f6db14e51062a233e8df7
-SCORE address: cxfdbc7aca1f4ba6d37d4f80eb112d0e62f0727280
+Succeeded to deploy: 0xc85113eb36a2ab92f1e49b54335cc45999b5329ae88fd6e9222e19587157e101
+SCORE address: cxc1594d72c121e2e7fa2bf04d20fc4f9c5a62512a
 
-BUILD SUCCESSFUL in 4s
+BUILD SUCCESSFUL in 5s
 1 actionable task: 1 executed
+
+========================================================================================
+$ ./gradlew sampleContract:deployToLocal -PkeystoreName=./godWallet.json -PkeystorePass=gochain
+
+> Task :sampleContract:deployToLocal
+>>> deploy to http://localhost:9082/api/v3
+>>> optimizedJar = /Users/mac/Books/BlockChainLecle/Buoi4-Deploy smartcontract/DeveraCourse/icon/SCORE/sampleContract/build/libs/SampleContract-0.1.0-optimized.jar
+>>> keystore = ./godWallet.json
+Succeeded to deploy: 0x4597d8a4df01418c866a544bd66383183699341ccd17e1592a5be4ffb22bfd34
+SCORE address: cx27a8852f2d217ff5531868da57b35d2e938a80ea
+
+BUILD SUCCESSFUL in 3s
+1 actionable task: 1 executed
+
 ```
 
 Check token balance of contract owner: 
@@ -99,27 +113,30 @@ Parameters:
 - _data: data to pass if receiver is contract
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx5a924818d89bd73864c6d2c30abcbb1eddfd4758 \
+Token contract: cxc1594d72c121e2e7fa2bf04d20fc4f9c5a62512a
+Sample contract: cx27a8852f2d217ff5531868da57b35d2e938a80ea
+
+goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxc1594d72c121e2e7fa2bf04d20fc4f9c5a62512a \
     --method transfer \
     --key_store ./godWallet.json --key_password gochain \
-    --nid 0x3 --step_limit 2000000000 \
-    --param _to=hxbb78dbaf1c3ed187e956abcfdf43eb1110077dd4 \
-    --param _value=1000000000000000000
-0xf491225b62717688eecb23eebf09042f1529a9a4d922fec00a99dea9b9e8c835
+    --param _to=cx27a8852f2d217ff5531868da57b35d2e938a80ea \
+    --param _value=1000000000000000000 \
+    --nid 0x3 --step_limit 20000000000000
+0xf11b8464578f763c5fa971da343db488f3855776bf8ef267fcc420476edd5336
 
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 txresult 0xf491225b62717688eecb23eebf09042f1529a9a4d922fec00a99dea9b9e8c835
+goloop rpc --uri http://127.0.0.1:9082/api/v3 txresult  0xf11b8464578f763c5fa971da343db488f3855776bf8ef267fcc420476edd5336
 {
-  "to": "cx5a924818d89bd73864c6d2c30abcbb1eddfd4758",
-  "cumulativeStepUsed": "0x2abf9",
-  "stepUsed": "0x2abf9",
+  "to": "cxc1594d72c121e2e7fa2bf04d20fc4f9c5a62512a",
+  "cumulativeStepUsed": "0x325d6",
+  "stepUsed": "0x325d6",
   "stepPrice": "0x2e90edd00",
   "eventLogs": [
     {
-      "scoreAddress": "cx5a924818d89bd73864c6d2c30abcbb1eddfd4758",
+      "scoreAddress": "cxc1594d72c121e2e7fa2bf04d20fc4f9c5a62512a",
       "indexed": [
         "Transfer(Address,Address,int,bytes)",
         "hxb6b5791be0b5ef67063b3c10b840fb81514db2fd",
-        "hxbb78dbaf1c3ed187e956abcfdf43eb1110077dd4",
+        "cx27a8852f2d217ff5531868da57b35d2e938a80ea",
         "0xde0b6b3a7640000"
       ],
       "data": [
@@ -127,27 +144,22 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 txresult 0xf491225b62717688eecb2
       ]
     }
   ],
-  "logsBloom": "0x00000000000000000000002000000000000000000000000000020000000000000000000000000000010000000000004000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000102000002000000000000000100000000000000000000000000000000000000000000100000000000000000000000000000000000000000001000080000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "logsBloom": "0x00000000000000000000002000000000000000000000000000000000000000020000000000000000000000000000004000000000000000000000000000000020000000000000000000000000000000020000000000000000000000000080000008000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000000000100000002000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000010000000000001000000000000000000000000000000000010000000000000000000000000000000040000000000000000",
   "status": "0x1",
-  "blockHash": "0x4eac52463cecb8273ecafd15b337f2ad6c8dcdf718e80a1fb437d6c794b88ecf",
-  "blockHeight": "0x1f11",
+  "blockHash": "0x1b01c087a11d1343090dec0b3769fe5fffcaae0eaab13636e04ee3856cc1cb7b",
+  "blockHeight": "0x4b2",
   "txIndex": "0x0",
-  "txHash": "0xf491225b62717688eecb23eebf09042f1529a9a4d922fec00a99dea9b9e8c835"
+  "txHash": "0xf11b8464578f763c5fa971da343db488f3855776bf8ef267fcc420476edd5336"
 }
 ```
 
 Check token balance of sender and receiver
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxc1594d72c121e2e7fa2bf04d20fc4f9c5a62512a --method balanceOf --param _owner=hxb6b5791be0b5ef67063b3c10b840fb81514db2fd
+0x47bf19673df52e37f240ff33c594c589c0000
 
-```
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx5a924818d89bd73864c6d2c30abcbb1eddfd4758 \
-    --method balanceOf \
-    --param _owner=hxb6b5791be0b5ef67063b3c10b840fb81514db2fd
-"0xb7abc627050305adf1495f92d4c589c0000"
-
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx5a924818d89bd73864c6d2c30abcbb1eddfd4758 \
-    --method balanceOf \
-    --param _owner=hxbb78dbaf1c3ed187e956abcfdf43eb1110077dd4
-"0xde0b6b3a7640000"
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx27a8852f2d217ff5531868da57b35d2e938a80ea --method balanceOf --param _owner=hxb6b5791be0b5ef67063b3c10b840fb81514db2fd
+0xde0b6b3a7640000
 ```
 
 ### Deploy token to testnet
