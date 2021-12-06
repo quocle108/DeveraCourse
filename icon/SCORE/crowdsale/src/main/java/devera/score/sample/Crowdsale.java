@@ -67,8 +67,10 @@ public class Crowdsale implements ICrowdsale
         // depositing tokens can only be done by owner
         Context.require(Context.getOwner().equals(_from));
 
-        // value should be greater than zero
+        // value should be greater than zero 
         Context.require(_value.compareTo(BigInteger.ZERO) >= 0);
+
+       // Context.require(_value.compareTo(fundingGoal*tokenPrice) >=0);
 
         // start Crowdsale hereafter
         this.activeCrowdsale = true;
