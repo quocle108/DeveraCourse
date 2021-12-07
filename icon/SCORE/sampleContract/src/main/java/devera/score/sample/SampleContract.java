@@ -41,12 +41,12 @@ public class SampleContract implements ISampleContract {
         Event1(_param1, _param2, BigInteger.valueOf(10000), _param3);
     }
 
-    @External
+    @External                                                                     // βcontractCall*ScontractCall = 25000*1 = 25000
     public void externalMethod2(Address _param1, Address _param2, long _param3) { // βinput*Sinput = 200*(32 + 32 + 8) = 14400
         vardbExample.set(_param3);                                                // βset*Sset = 320(8) = 2560
         Event2(_param1, _param2, _param3);                                        // βeventLog*SeventLog = 100*(32 + 32 + 8) = 7200
                                                                                   // C = 100,000
-                                                                                  // 14400 + 2560 + 7200 + 100,000 = 124160
+                                                                                  // 25,000 + 14,400 + 2,560 + 7,200 + 100,000 = 149160
     }
 
     protected void _internalMethod1(Address _param1, BigInteger _param2) {
