@@ -115,13 +115,11 @@ class CrowdsaleTest extends TestBase {
 
         //withdraw icx to owner
         LOG.info("withdraw to : " + ownerWallet.getAddress().toString());
-       BigInteger amount = ICX.multiply(BigInteger.valueOf(100));
-        TransactionResult resulWithDraw = crowdsaleScore.withDraw(ownerWallet, amount);
-        if (!Constants.STATUS_SUCCESS.equals(resulWithDraw.getStatus())) {
-            throw new IOException("Failed to execute safeWithdrawal.");
-        }
-        LOG.info(resulWithDraw.toString());
-        //crowdsaleScore.ensureWithDraw(result, ownerWallet.getAddress(), amount);
+        BigInteger amount = ICX.multiply(BigInteger.valueOf(100));
+        TransactionResult resultWithDraw = crowdsaleScore.withDraw(ownerWallet, amount);
+        
+        LOG.info(resultWithDraw.toString());
+       
 
        
 
