@@ -177,8 +177,8 @@ Initialize parameters:
 $ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx deploy ./crowdsale/build/libs/Crowdsale-0.1.0-optimized.jar \
     --key_store ./godWallet.json --key_password gochain \
     --nid 0x3 --step_limit 2000000000 --content_type application/java \
-    --param _fundingGoalInIcx=10000000000000000000 \
-    --param _tokenScore=cx263b35530f7487470dbe97ed25031a657cd02224 \
+    --param _fundingGoalInIcx=10 \
+    --param _tokenScore=cx79158ef89bda22e927bd04e751473610ca1bc4ea \
     --param _durationInBlocks=3600 \
     --param _tokenPrice=10
 0xd33c29366d1aaf13e01e1252523f6b30508fbbbfcd361358784461c6650c4bc3
@@ -220,10 +220,10 @@ BUILD SUCCESSFUL in 15s
 Get name and description of crowsale project:
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx6749c6a328d0b33e66dd4ffcce8982c3850be21a \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c \
     --method name
 "Sample Crowdsale"
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx6749c6a328d0b33e66dd4ffcce8982c3850be21a \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c \
     --method description
 "Devera ICON dapp development course"
 ```
@@ -231,8 +231,8 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx6749c6a328d0b33e66dd
 ### Transfer IRC2 token to crowdsale score to active crowdsale
 
 ```
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx263b35530f7487470dbe97ed25031a657cd02224 --method transfer \
-  --param _to=cxf956284c78e35f08769c5d65c422d62aecefb923 \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxd2e2cfe28562ed17bf3446f9368a5cdccba1ea76 --method transfer \
+  --param _to=cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c \
   --param _value=1000000000000000000000000 \
   --key_store ./godWallet.json --key_password gochain \
   --nid 0x3 --step_limit 2000000000
@@ -243,7 +243,7 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx263b35530f748
 Transfer token to crowdsale contract
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cxf956284c78e35f08769c5d65c422d62aecefb923 --value 1000000000000000000 --key_store ./daniel111.ks.json --key_password abc12345 --nid 0x3 --step_limit 1000000000
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c --value 4000000000000000000 --key_store ./daniel.json --key_password abc123456 --nid 0x3 --step_limit 1000000000
 ```
 
 ### Check result
@@ -251,12 +251,33 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cxf956284c7
 Check IRC2 token after transfer token
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxf956284c78e35f08769c5d65c422d62aecefb923 --method balanceOf --param _owner=hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxd2e2cfe28562ed17bf3446f9368a5cdccba1ea76 --method balanceOf --param _owner=hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39
 ```
 
 Check ICX balance record in crowdsale contract
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx263b35530f7487470dbe97ed25031a657cd02224 --method balanceOf --param _owner=hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxc624a8a090f3cd00d2a9b87bf2f5d52fae6c07ec --method balanceOf --param _owner=hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39
 ```
 
+### Check ICX balance before withdraw
+
+```
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance hxb6b5791be0b5ef67063b3c10b840fb81514db2fd
+```
+
+
+### Withdraw balance
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c --method withdraw \
+  --param _value=1000000000000000000 \
+  --key_store ./godWallet.json --key_password gochain \
+  --nid 0x3 --step_limit 2000000000
+```
+
+### Check ICX balance after withdraw
+
+```
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance hxb6b5791be0b5ef67063b3c10b840fb81514db2fd
+```

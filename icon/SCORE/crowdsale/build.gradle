@@ -41,8 +41,8 @@ deployJar {
     keystore = rootProject.hasProperty('keystoreName') ? "$keystoreName" : ''
     password = rootProject.hasProperty('keystorePass') ? "$keystorePass" : ''
     parameters {
-        arg('_fundingGoalInIcx', '10000000000000000000')
-        arg('_tokenScore', 'cx263b35530f7487470dbe97ed25031a657cd02224')
+        arg('_fundingGoalInIcx', '10')
+        arg('_tokenScore', 'cxd2e2cfe28562ed17bf3446f9368a5cdccba1ea76')
         arg('_durationInBlocks', '3600')
         arg('_tokenPrice', '10')
     }

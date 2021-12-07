@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>crowdsale</title>
+</head>
+
+<body>
+    <h1>Crowdlsale</h1>
+
+    <h2>Enter crowdsale contract address to start</h2>
+    <p>Crowdsale contract Address : <input id="request-crowdsale-data" type="text"/></p>
+    <button id="request-crowdsale">Enter</button>
+
+    <p>--------------------</p>
+    <p><b id="project-name"></b></p>
+    <p><b id="project-description"></b></p>
+
+    <p>--------------------</p>
+    <p><b>Choose you address to interact with crowdsale dapp</b></p>
+    <button id="request-address">Choose wallet address</button>
+    <p id="response-address"></p>
+
+    <h2>Deposit to crowdsale</h2>
+    <p>Amount : <input id="request-deposit-amount" type="text"/></p>
+    <button id="request-deposit">Deposit</button>
+
+    <h2>Check result</h2>
+    <button id="check-balance">Check deposited balance</button>
+    <p id="deposited-balance"></p>
+
+    <script src="http://cdn.jsdelivr.net/gh/icon-project/icon-sdk-js@latest/build/icon-sdk-js.web.min.js"></script>
+    <script async>
+        var IconService = window['icon-sdk-js']
+        // var IconWallet = IconService.IconWallet
+        var IconAmount = IconService.IconAmount
+        var IconConverter = IconService.IconConverter
+        var IconBuilder = IconService.IconBuilder
+
+        var currentAddress;
+        var crowdsaleContractAddress;
+
+        var projectName = document.getElementById("project-name");
+        var projectDescription = document.getElementById("project-description");
+
+        var requestCrowdsale = document.getElementById("request-crowdsale")
+        var responseHasAccount = document.getElementById("response-has-account")
+
+        var requestHasAddress = document.getElementById("request-has-address")
+        var requestCrowdsaleData = document.getElementById("request-crowdsale-data")
+
+        var requestDeposit = document.getElementById("request-deposit")
+        var requestDepositAmount = document.getElementById("request-deposit-amount")
+
+        var checkBalance = document.getElementById("check-balance")
+        var depositedBalance = document.getElementById("deposited-balance")
+
+        var requestAddress = document.getElementById("request-address")
+        var responseAddress = document.getElementById("response-address")
+
+        window.addEventListener("ICONEX_RELAY_RESPONSE", eventHandler, false);
+        function eventHandler(event) {
+            var type = event.detail.type
+            var payload = event.detail.payload
+            switch (type) {
+                case "RESPONSE_ADDRESS":
+                    currentAddress = payload
+                    responseAddress.innerHTML = "> Selected ICX Address : " + payload;
+                    jsonRpc0.disabled = false
+                    jsonRpc1.disabled = false
+                    jsonRpc2.disabled = false
+                    jsonRpc3.disabled = false
+                    break
+                case "RESPONSE_JSON-RPC":
+                    if (payload.id === 1111) {
+                        projectName.innerHTML = payload.result;
+
+                        var callBuilder = new IconBuilder.CallBuilder;
+                        var descriptionRequestData = callBuilder
+                        .to(requestCrowdsaleData.value || requestCrowdsaleData.placeholder)
+                        .method("description")
+                        .build()
+
+                        window.dispatchEvent(new CustomEvent('ICONEX_RELAY_REQUEST', {
+                            detail: {
+                                type: 'REQUEST_JSON-RPC',
+                                payload: {
+                                    "jsonrpc": "2.0",
+                                    "method": "icx_call",
+                                    "params": descriptionRequestData,
+                                    "id": 2222
+                                }
+                            }
+                        }))
+                    }
+
+                    if (payload.id === 2222) {
+                        projectDescription.innerHTML = payload.result;
+                        break;
+                    }
+
+                    if (payload.id === 3333) {
+                        depositedBalance.innerHTML = "> Deposited balance : " + IconConverter.toBigNumber(payload.result).dividedBy(IconConverter.toBigNumber('10').exponentiatedBy(18)).toString();
+                        break;
+                    }
+
+                    break;
+
+                default:
+            }
+        }
+
+        requestCrowdsale.onclick = function () {
+            var callBuilder = new IconBuilder.CallBuilder;
+            crowdsaleContractAddress = requestCrowdsaleData.value;
+            var nameRequestData = callBuilder
+                .to(crowdsaleContractAddress)
+                .method("name")
+                .build()
+
+            window.dispatchEvent(new CustomEvent('ICONEX_RELAY_REQUEST', {
+                detail: {
+                    type: 'REQUEST_JSON-RPC',
+                    payload: {
+                        "jsonrpc": "2.0",
+                        "method": "icx_call",
+                        "params": nameRequestData,
+                        "id": 1111
+                    }
+                }
+            }))
+        }
+
+        checkBalance.onclick = function () {
+            var callBuilder = new IconBuilder.CallBuilder;
+            var balanceOfRequestData = callBuilder
+                .to(crowdsaleContractAddress)
+                .method("balanceOf")
+                .params({
+                    "_owner": currentAddress
+                })
+                .build()
+
+            window.dispatchEvent(new CustomEvent('ICONEX_RELAY_REQUEST', {
+                detail: {
+                    type: 'REQUEST_JSON-RPC',
+                    payload: {
+                        "jsonrpc": "2.0",
+                        "method": "icx_call",
+                        "params": balanceOfRequestData,
+                        "id": 3333
+                    }
+                }
+            }))
+        }
+
+        requestDeposit.onclick = function () {
+            var depositValue = requestDepositAmount.value;
+            var icxTransactionBuilder = new IconBuilder.IcxTransactionBuilder;
+            var icxTransferData = icxTransactionBuilder
+                .from(currentAddress)
+                .to(crowdsaleContractAddress)
+                .nid(IconConverter.toBigNumber(3))
+                .value(IconAmount.of(depositValue, IconAmount.Unit.ICX).toLoop())
+                .timestamp((new Date()).getTime() * 1000)
+                .version(IconConverter.toBigNumber(3))
+                .stepLimit(IconConverter.toBigNumber(10000000))
+                .build();
+
+            window.dispatchEvent(new CustomEvent('ICONEX_RELAY_REQUEST', {
+                detail: {
+                    type: 'REQUEST_JSON-RPC',
+                    payload: {
+                        "jsonrpc": "2.0",
+                        "method": "icx_sendTransaction",
+                        "params": IconConverter.toRawTransaction(icxTransferData),
+                        "id": 1111
+                    }
+                }
+            }))
+        }
+
+        requestAddress.onclick = function () {
+            window.dispatchEvent(new CustomEvent('ICONEX_RELAY_REQUEST', {
+                detail: {
+                    type: 'REQUEST_ADDRESS'
+                }
+            }))
+        }
+
+    </script>
+</body>
+</html>
