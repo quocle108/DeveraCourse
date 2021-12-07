@@ -103,12 +103,18 @@ class CrowdsaleTest extends TestBase {
         BigInteger aliceDepositIcxAmount = BigInteger.valueOf(40);
         BigInteger bobDepositIcxAmount = BigInteger.valueOf(60);
         ids[0] = txHandler.transfer(aliceWallet, crowdsaleScore.getAddress(), ICX.multiply(aliceDepositIcxAmount));
+        
         ids[1] = txHandler.transfer(bobWallet, crowdsaleScore.getAddress(), ICX.multiply(bobDepositIcxAmount));
+        LOG.info(txHandler.getResult(ids[1]).toString());
         for (Bytes id : ids) {
             assertSuccess(txHandler.getResult(id));
         }
         tokenScore.ensureTokenBalance(aliceWallet.getAddress(), aliceDepositIcxAmount.multiply(tokenPrice));
         tokenScore.ensureTokenBalance(bobWallet.getAddress(), bobDepositIcxAmount.multiply(tokenPrice));
         LOG.infoExiting();
+
+        //withdraw icx to owner
+
+        
     }
 }

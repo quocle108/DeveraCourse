@@ -48,6 +48,7 @@ public class SampleTokenScore extends Score {
                 .build();
         Score score = txHandler.deploy(wallet, getFilePath("irc2"), params);
         LOG.info("scoreAddr = " + score.getAddress());
+         System.out.println("scoreAddr = " + score.getAddress());
         LOG.infoExiting();
         return new SampleTokenScore(score);
     }

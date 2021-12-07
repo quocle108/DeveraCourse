@@ -53,7 +53,11 @@ public class CrowdSaleScore extends Score {
     public CrowdSaleScore(Score other) {
         super(other);
     }
-
+   
+                
+         
+       
+    
     public void ensureFundingGoal(TransactionResult result, BigInteger fundingGoalInIcx)
             throws IOException {
         TransactionResult.EventLog event = findEventLog(result, getAddress(), "CrowdsaleStarted(int,int)");
@@ -61,6 +65,7 @@ public class CrowdSaleScore extends Score {
             BigInteger fundingGoalInLoop = IconAmount.of(fundingGoalInIcx, IconAmount.Unit.ICX).toLoop();
             BigInteger fundingGoalFromScore = event.getData().get(0).asInteger();
             if (fundingGoalInLoop.equals(fundingGoalFromScore)) {
+                LOG.info("Balance of ICX in crowdsale: " + fundingGoalFromScore);
                 return; // ensured
             }
         }
