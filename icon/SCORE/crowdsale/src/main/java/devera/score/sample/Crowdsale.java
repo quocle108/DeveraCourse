@@ -21,6 +21,7 @@ public class Crowdsale implements ICrowdsale
     private boolean activeCrowdsale;
     private final DictDB<Address, BigInteger> balances;
     private final VarDB<BigInteger> amountRaised;
+    private final VarDB<Withdrawal> amountRaised;
     private BigInteger testAmount;
 
     public Crowdsale(BigInteger _fundingGoalInIcx, Address _tokenScore, BigInteger _durationInBlocks, BigInteger _tokenPrice) {
