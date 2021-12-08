@@ -36,6 +36,7 @@ deployJar {
         local {
             uri = 'http://localhost:9082/api/v3'
             nid = 0x3
+            to = 'cxe0d85240401ea6193fa4f168c1cdc480a347da2a'
         }
     }
     keystore = rootProject.hasProperty('keystoreName') ? "$keystoreName" : ''

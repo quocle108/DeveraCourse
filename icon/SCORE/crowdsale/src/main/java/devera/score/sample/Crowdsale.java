@@ -7,6 +7,7 @@ import score.VarDB;
 import score.annotation.EventLog;
 import score.annotation.External;
 import score.annotation.Payable;
+import score.annotation.Optional;
 
 import java.math.BigInteger;
 
@@ -54,6 +55,34 @@ public class Crowdsale implements ICrowdsale
     @External(readonly=true)
     public BigInteger balanceOf(Address _owner) {
         return this.safeGetBalance(_owner);
+    }
+
+    @External(readonly=true)
+    public BigInteger amountRaised() {
+        return safeGetAmountRaised();
+    }
+
+    @External(readonly = true)
+    public Address beneficiary() {
+        return this.beneficiary;
+    }
+    
+    @External
+    public void withdraw(BigInteger _value) {
+        // Check caller is the beneficiary
+        Address _to = Context.getCaller();
+        Context.require(_to.equals(this.beneficiary));
+        Context.require(_value.compareTo(BigInteger.ZERO) > 0);
+
+        // // subtract amountRaised
+        BigInteger amountRaised = safeGetAmountRaised();
+        this.amountRaised.set(amountRaised.subtract(_value));
+
+        // // add ICX to beneficiary
+        BigInteger toBalance = safeGetBalance(_to);
+        this.balances.set(_to, toBalance.add(_value));
+
+        Withdraw(_to, _value);
     }
 
     /*
@@ -121,4 +150,7 @@ public class Crowdsale implements ICrowdsale
 
     @EventLog(indexed=2)
     public void FundDeposit(Address backer, BigInteger amount) {}
+
+    @EventLog
+    public void Withdraw(Address _to, BigInteger _value) {}
 }
