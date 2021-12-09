@@ -54,17 +54,52 @@ public class CrowdSaleScore extends Score {
         super(other);
     }
 
-    public TransactionResult withdraw(Wallet wallet, BigInteger value)
+    public TransactionResult withdraw(Wallet wallet, BigInteger value, String description)
             throws ResultTimeoutException, IOException {
         RpcObject params = new RpcObject.Builder()
             .put("_value", new RpcValue(value))
+            .put("_description", new RpcValue(description))
             .build();
         return invokeAndWaitResult(wallet, "withdraw", params);
+    }
+
+    public TransactionResult executeWithdrawal(Wallet wallet)
+        throws ResultTimeoutException, IOException {
+        RpcObject params = new RpcObject.Builder()
+            .build();
+        return invokeAndWaitResult(wallet, "executeWithdrawal", params);
+    }
+
+    public TransactionResult voteWithdrawal(Wallet wallet)
+    throws ResultTimeoutException, IOException {
+        RpcObject params = new RpcObject.Builder()
+            .build();
+        return invokeAndWaitResult(wallet, "voteWithdrawal", params);
     }
 
     public BigInteger amountRaised()
             throws ResultTimeoutException, IOException {
         return this.call("amountRaised", null).asInteger();
+    }
+
+    public void ensureWithdrawal(BigInteger checkingAmount, BigInteger checkingWeight, String checkingDescription)
+        throws IOException {
+        RpcObject withdrawal = this.call("withdrawal", null).asObject();
+        BigInteger amount = new BigInteger(withdrawal.getItem("_amount").toString());
+        BigInteger weight = new BigInteger(withdrawal.getItem("_approvedWeight").toString());
+        String description = withdrawal.getItem("_description").asString();
+
+        if (!checkingAmount.equals(amount)) {
+            throw new IOException("withdrawal amount is invalid");
+        }
+
+        if (!checkingWeight.equals(weight)) {
+            throw new IOException("withdrawal amount is invalid");
+        }
+
+        if (!checkingDescription.equals(description)) {
+            throw new IOException("withdrawal description is invalid");
+        }
     }
 
     public void ensureFundingGoal(TransactionResult result, BigInteger fundingGoalInIcx)

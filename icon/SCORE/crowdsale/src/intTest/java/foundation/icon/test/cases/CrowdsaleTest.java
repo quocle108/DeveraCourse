@@ -114,14 +114,22 @@ class CrowdsaleTest extends TestBase {
 
         // do safe withdrawal
         LOG.infoEntering("call", "withdraw()");
-        BigInteger oldBal = txHandler.getBalance(ownerWallet.getAddress());
         BigInteger withdrawAmount = ICX.multiply(BigInteger.valueOf(30));
-        result = crowdsaleScore.withdraw(ownerWallet, withdrawAmount);
+        String description = "lesson 8";
+        crowdsaleScore.withdraw(ownerWallet, withdrawAmount, description);
         if (!Constants.STATUS_SUCCESS.equals(result.getStatus())) {
             throw new IOException("Failed to execute withdraw.");
         }
-        crowdsaleScore.ensureFundWithdraw(result, ownerWallet.getAddress(), withdrawAmount);
+        crowdsaleScore.ensureWithdrawal(withdrawAmount, BigInteger.ZERO, description);
 
+        crowdsaleScore.voteWithdrawal(aliceWallet);
+        crowdsaleScore.ensureWithdrawal(withdrawAmount, ICX.multiply(aliceDepositIcxAmount), description);
+        crowdsaleScore.voteWithdrawal(bobWallet);
+
+        crowdsaleScore.ensureWithdrawal(withdrawAmount, ICX.multiply(aliceDepositIcxAmount).add(ICX.multiply(bobDepositIcxAmount)), description);
+
+        BigInteger oldBal = txHandler.getBalance(ownerWallet.getAddress());
+        result = crowdsaleScore.executeWithdrawal(ownerWallet);
         // check the final icx balance of owner
         LOG.info("ICX balance before safeWithdrawal: " + oldBal);
         BigInteger fee = result.getStepUsed().multiply(result.getStepPrice());

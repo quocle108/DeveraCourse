@@ -9,6 +9,9 @@ import score.annotation.External;
 import score.annotation.Payable;
 
 import java.math.BigInteger;
+import java.util.Map;
+
+import scorex.util.ArrayList;
 
 public class Crowdsale implements ICrowdsale
 {
@@ -21,7 +24,7 @@ public class Crowdsale implements ICrowdsale
     private boolean activeCrowdsale;
     private final DictDB<Address, BigInteger> balances;
     private final VarDB<BigInteger> amountRaised;
-    private final VarDB<Withdrawal> amountRaised;
+    private final VarDB<Withdrawal> withdrawal = Context.newVarDB("withdrawal", Withdrawal.class);
     private BigInteger testAmount;
 
     public Crowdsale(BigInteger _fundingGoalInIcx, Address _tokenScore, BigInteger _durationInBlocks, BigInteger _tokenPrice) {
@@ -60,6 +63,14 @@ public class Crowdsale implements ICrowdsale
     @External(readonly=true)
     public BigInteger amountRaised() {
         return this.amountRaised.get();
+    }
+
+    @External(readonly=true)
+    public Map withdrawal() {
+        if (this.withdrawal.get() == null) {
+            Context.revert("withdrawal not found");
+        }
+        return this.withdrawal.get().toMap();
     }
 
     /*
@@ -109,15 +120,8 @@ public class Crowdsale implements ICrowdsale
         FundDeposit(_from, _value);
     }
 
-    /*
-     * Withdraws the funds safely.
-     *
-     *  - If the funding goal has been reached, sends the entire amount to the beneficiary.
-     *  - If the goal was not reached, each contributor can withdraw the amount they contributed.
-     */
     @External
-    public void withdraw(BigInteger _value) {
-        Context.require(this.activeCrowdsale);
+    public void withdraw(BigInteger _value, String _description) {
         Address _from = Context.getCaller();
         if (!this.beneficiary.equals(_from)) {
             Context.revert("unauthorized");
@@ -127,18 +131,69 @@ public class Crowdsale implements ICrowdsale
             Context.revert("can not withdraw during crowdsale");
         }
 
-        BigInteger amountRaised = safeGetAmountRaised();
-
-        if (amountRaised.compareTo(_value) < 0) {
+        if (this.amountRaised.get().compareTo(_value) < 0) {
             Context.revert("overdraw balance");
         }
 
+        if (this.withdrawal.get() != null) {
+            Context.revert("already created withdrawal");
+        }
+        Withdrawal newWithdrawal = new Withdrawal(_value, BigInteger.ZERO, _description, new ArrayList<Address>());
+        this.withdrawal.set(newWithdrawal);
+    }
+
+    @External
+    public void cancelWithdrawal() {
+        Address _from = Context.getCaller();
+        if (!this.beneficiary.equals(_from)) {
+            Context.revert("unauthorized");
+        }
+
+        if (this.withdrawal.get() == null) {
+            Context.revert("withdrawal not found");
+        }
+        this.withdrawal.set(null);
+    }
+
+    @External
+    public void voteWithdrawal() {
+        Address _from = Context.getCaller();
+        BigInteger depositedBalance = this.safeGetBalance(_from);
+        if (depositedBalance.equals(BigInteger.ZERO)) {
+            Context.revert("only depositor can vote for withdrawal");
+        }
+        Withdrawal currentWithdrawal = this.withdrawal.get();
+        if (currentWithdrawal == null) {
+            Context.revert("withdrawal not found");
+        }
+
+        currentWithdrawal.vote(_from, depositedBalance);
+        this.withdrawal.set(currentWithdrawal);
+    }
+
+    @External
+    public void executeWithdrawal() {
+        Address _from = Context.getCaller();
+        if (!this.beneficiary.equals(_from)) {
+            Context.revert("unauthorized");
+        }
+
+        Withdrawal currentWithdrawal = this.withdrawal.get();
+        if (currentWithdrawal == null) {
+            Context.revert("withdrawal not found");
+        }
+        
+        if (currentWithdrawal.getApprovedWeight().compareTo(this.fundingGoal) < 0) {
+            Context.revert("not enough vote weight");
+        }
+
         // transfer the funds to beneficiary
-        Context.transfer(this.beneficiary, _value);
+        Context.transfer(this.beneficiary, currentWithdrawal.getAmount());
         // emit eventlog
-        FundWithdraw(this.beneficiary, _value);
+        FundWithdraw(this.beneficiary, currentWithdrawal.getAmount());
         // reset amountRaised
-        this.amountRaised.set(amountRaised.subtract(_value));
+        this.amountRaised.set(this.amountRaised.get().subtract(currentWithdrawal.getAmount()));
+        this.withdrawal.set(null);
     }
 
     private BigInteger safeGetBalance(Address owner) {

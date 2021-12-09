@@ -178,7 +178,7 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx deploy ./crowdsale/build/
     --key_store ./godWallet.json --key_password gochain \
     --nid 0x3 --step_limit 2000000000 --content_type application/java \
     --param _fundingGoalInIcx=10 \
-    --param _tokenScore=cx79158ef89bda22e927bd04e751473610ca1bc4ea \
+    --param _tokenScore=cx3a1ad95b690f8723b97684b1dda0631b63191f26 \
     --param _durationInBlocks=3600 \
     --param _tokenPrice=10
 0xd33c29366d1aaf13e01e1252523f6b30508fbbbfcd361358784461c6650c4bc3
@@ -220,10 +220,10 @@ BUILD SUCCESSFUL in 15s
 Get name and description of crowsale project:
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 \
     --method name
 "Sample Crowdsale"
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 \
     --method description
 "Devera ICON dapp development course"
 ```
@@ -231,8 +231,8 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx0a9bdb97e2d86cc51f56
 ### Transfer IRC2 token to crowdsale score to active crowdsale
 
 ```
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxd2e2cfe28562ed17bf3446f9368a5cdccba1ea76 --method transfer \
-  --param _to=cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxaa63b56be808d1a78e256626a59b6fa278b18a2c --method transfer \
+  --param _to=cx093fce35905ec90c5fb3699a40b38bd0b9f66853 \
   --param _value=1000000000000000000000000 \
   --key_store ./godWallet.json --key_password gochain \
   --nid 0x3 --step_limit 2000000000
@@ -243,7 +243,7 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxd2e2cfe28562e
 Transfer token to crowdsale contract
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c --value 4000000000000000000 --key_store ./daniel.json --key_password abc123456 --nid 0x3 --step_limit 1000000000
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 --value 4000000000000000000 --key_store ./daniel.json --key_password abc123456 --nid 0x3 --step_limit 1000000000
 ```
 
 ### Check result
@@ -257,7 +257,7 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxd2e2cfe28562ed17bf34
 Check ICX balance record in crowdsale contract
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxc624a8a090f3cd00d2a9b87bf2f5d52fae6c07ec --method balanceOf --param _owner=hxc00a6d2d1e9ee0686704e0b6eec75d0f2c095b39
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cxdf44a955295e375565f49be40225ac0eada0ebbe --method balanceOf --param _owner=hxbb78dbaf1c3ed187e956abcfdf43eb1110077dd4
 ```
 
 ### Check ICX balance before withdraw
@@ -267,11 +267,34 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance hxb6b5791be0b5ef67063b3c
 ```
 
 
-### Withdraw balance
+### Owner create withdrawal with description
 
 ```bash
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx0a9bdb97e2d86cc51f56c933f95c8aea576f4a5c --method withdraw \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 --method withdraw \
   --param _value=1000000000000000000 \
+  --param _description="devera course lesson 7" \
+  --key_store ./godWallet.json --key_password gochain \
+  --nid 0x3 --step_limit 2000000000
+```
+
+### Get withdrawal store in state db
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 --method withdrawal
+```
+
+### Depositor vote for withdrawal
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 --method voteWithdrawal \
+  --key_store ./daniel.json --key_password abc123456 \
+  --nid 0x3 --step_limit 2000000000
+```
+
+### Owner execute withdrawal
+
+```bash
+goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 --method executeWithdrawal \
   --key_store ./godWallet.json --key_password gochain \
   --nid 0x3 --step_limit 2000000000
 ```
@@ -280,4 +303,12 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx0a9bdb97e2d86
 
 ```
 $ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance hxb6b5791be0b5ef67063b3c10b840fb81514db2fd
+```
+
+### Owner cancel withdrawal
+
+```
+goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 --method cancelWithdrawal \
+  --key_store ./godWallet.json --key_password gochain \
+  --nid 0x3 --step_limit 2000000000
 ```

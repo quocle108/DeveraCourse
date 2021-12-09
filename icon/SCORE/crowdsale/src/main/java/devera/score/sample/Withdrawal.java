@@ -1,53 +1,83 @@
 package devera.score.example;
 
+import score.Address;
 import java.math.BigInteger;
 import java.util.List;
 import score.ObjectReader;
 import score.ObjectWriter;
 import scorex.util.ArrayList;
+import java.util.Map;
 
 public class Withdrawal {
   private final BigInteger amount;
-  private final List<byte[]> approvers;
-  private final BigInteger approvedWeight;
-  public Validators(BigInteger amount, List<byte[]> approvers, BigInteger approvedWeight) {
+  private List<Address> approvers;
+  private BigInteger approvedWeight;
+  private String description;
+  public Withdrawal(BigInteger amount, BigInteger approvedWeight, String description, List<Address> approvers) {
       this.amount = amount;
       this.approvers = approvers;
       this.approvedWeight = approvedWeight;
+      this.description = description;
   }
 
-  public List<byte[]> getApprovers() {
+  public List<Address> getApprovers() {
       return this.approvers;
   }
 
-  public BigInteger approvedWeight() {
+  public BigInteger getApprovedWeight() {
       return this.approvedWeight;
   }
 
-  public BigInteger amount() {
+  public BigInteger getAmount() {
       return this.amount;
   }
 
-  public static void writeObject(ObjectWriter w, Validators v) {
-      List<byte[]> validators = v.get();
-      w.beginList(validators.size());
-
-      for(int i = 0; i < validators.size(); i++) {
-          w.write(validators.get(i));
-      }
-
-      w.end();
+  public String getDescription() {
+    return this.description;
   }
 
-  public static Validators readObject(ObjectReader r) {
-      r.beginList();
-      List<byte[]> validators = new ArrayList<byte[]>(150);
-      while (r.hasNext()) {
-          byte[] v = r.readByteArray();
-          validators.add(v);
-      }
-      r.end();
+  public void vote(Address voter, BigInteger weight) {
+    this.approvedWeight = this.approvedWeight.add(weight);
+    this.approvers.add(voter);
+  }
 
-      return new Validators(validators);
+  public Map<String, Object> toMap() {
+    return Map.of(
+            "_amount", this.amount.toString(),
+            "_approvedWeight", this.approvedWeight.toString(),
+            "_description", this.description,
+            "_approvers", this.approvers
+    );
+  }
+
+  public static void writeObject(ObjectWriter w, Withdrawal v) {
+    w.beginList(3);
+    w.write(v.getAmount());
+    w.write(v.getApprovedWeight());
+    w.write(v.getDescription());
+        List<Address> approvers = v.getApprovers();
+        w.beginList(approvers.size());
+
+        for(int i = 0; i < approvers.size(); i++) {
+            w.write(approvers.get(i));
+        }
+        w.end();
+    w.end();
+  }
+
+  public static Withdrawal readObject(ObjectReader r) {
+    r.beginList();
+    BigInteger amount = r.readBigInteger();
+    BigInteger approvedWeight = r.readBigInteger();
+    String description = r.readString();
+    List<Address> approvers = new ArrayList<Address>(150);
+        r.beginList();
+        while (r.hasNext()) {
+            Address v = r.readAddress();
+            approvers.add(v);
+        }
+    r.end();
+    
+    return new Withdrawal(amount, approvedWeight, description, approvers);
   }
 }
