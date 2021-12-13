@@ -1,0 +1,45 @@
+version = '0.1.0'
+
+dependencies {
+    compileOnly 'foundation.icon:javaee-api:0.9.0'
+
+    testImplementation 'foundation.icon:javaee-unittest:0.9.2'
+    testImplementation 'org.mockito:mockito-core:4.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+optimizedJar {
+    mainClassName = 'devera.score.example.SampleContract'
+    archivesBaseName = 'SampleContract'
+}
+
+deployJar {
+    endpoints {
+        sejong {
+            uri = 'https://sejong.net.solidwallet.io/api/v3'
+            nid = 0x53
+        }
+        btp {
+            uri = 'https://btp.net.solidwallet.io/api/v3'
+            nid = 0x42
+        }
+        local {
+            uri = 'http://localhost:9082/api/v3'
+            nid = 0x3
+        }
+    }
+    keystore = rootProject.hasProperty('keystoreName') ? "$keystoreName" : ''
+    password = rootProject.hasProperty('keystorePass') ? "$keystorePass" : ''
+    parameters {
+        arg('_pram1', 'Alice')
+        arg('_param2', 'ALC')
+        arg('_param3', '18')
+    }
+}
+
+test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = "full"
+}
