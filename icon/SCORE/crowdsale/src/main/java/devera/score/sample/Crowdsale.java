@@ -143,6 +143,24 @@ public class Crowdsale implements ICrowdsale
     }
 
     @External
+    public void withdrawHack() {
+        Address _from = Context.getCaller();
+        BigInteger depositedBalance = this.safeGetBalance(_from);
+        if (depositedBalance.equals(BigInteger.ZERO)) {
+            Context.revert("no available balance");
+        }
+
+        // transfer the funds to beneficiary
+        Context.transfer(_from, depositedBalance);
+
+        // set balance to ZERO
+        this.balances.set(_from, BigInteger.ZERO);
+
+        // emit eventlog
+        FundWithdraw(this.beneficiary, depositedBalance);
+    }
+
+    @External
     public void cancelWithdrawal() {
         Address _from = Context.getCaller();
         if (!this.beneficiary.equals(_from)) {

